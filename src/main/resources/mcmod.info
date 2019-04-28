@@ -1,0 +1,11 @@
+[
+  {
+    "modid": "simplycrafting",
+    "name": "Simply Crafting",
+    "description": "Simply automatic crafting!",
+    "version": "1.0",
+    "mcversion": "1.12",
+    "url": "https://minecraft.curseforge.com/projects/simply-crafting",
+    "authorList": ["SHsuperCM"]
+  }
+]

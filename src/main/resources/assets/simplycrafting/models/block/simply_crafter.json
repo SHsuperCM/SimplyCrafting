@@ -1,0 +1,12 @@
+{
+  "parent": "block/cube",
+  "textures": {
+    "particle": "simplycrafting:blocks/simply_crafter_front",
+    "down": "simplycrafting:blocks/simply_crafter_bottom",
+    "up": "simplycrafting:blocks/simply_crafter_top",
+    "north": "simplycrafting:blocks/simply_crafter_front",
+    "east": "simplycrafting:blocks/simply_crafter_side",
+    "south": "simplycrafting:blocks/simply_crafter_side",
+    "west": "simplycrafting:blocks/simply_crafter_front"
+  }
+}

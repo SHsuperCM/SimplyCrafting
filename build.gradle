@@ -1,0 +1,30 @@
+buildscript {
+    repositories {
+        jcenter()
+        maven { url = "http://files.minecraftforge.net/maven" }
+    }
+    dependencies {
+        classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
+    }
+}
+apply plugin: 'net.minecraftforge.gradle.forge'
+
+version = "1.0"
+group = "shcm.shsupercm.forge"
+archivesBaseName = "simplycrafting"
+
+sourceCompatibility = targetCompatibility = '1.8'
+compileJava {
+    sourceCompatibility = targetCompatibility = '1.8'
+}
+
+minecraft {
+    version = "1.12.2-14.23.5.2831"
+    runDir = "run"
+	
+    mappings = "snapshot_20171003"
+}
+
+dependencies {
+    compile files('libs\\jei_1.12.2-4.15.0.277.jar')
+}
