@@ -25,13 +25,9 @@ public class ContainerSimplyCrafter extends Container {
 
         for (int y = 0; y < 3; ++y)
             for (int x = 0; x < 3; ++x)
-                this.addSlotToContainer(new SlotItemHandler(tileEntity.craftingItemHandler, x + y * 3, 30 + x * 18, 17 + y * 18));
+                this.addSlotToContainer(new SlotItemHandler(tileEntity.inventory.container(), x + y * 3, 30 + x * 18, 17 + y * 18));
 
-        this.addSlotToContainer(new SlotItemHandler(tileEntity.craftingItemHandler, 9, 124, 35) {
-            @Override
-            public boolean isItemValid(ItemStack stack) {
-                return false;
-            }
+        this.addSlotToContainer(new SlotItemHandler(tileEntity.inventory.container(), 9, 124, 35) {
         });
     }
 
