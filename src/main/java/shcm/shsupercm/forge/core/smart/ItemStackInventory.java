@@ -1,5 +1,8 @@
 package shcm.shsupercm.forge.core.smart;
 
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.inventory.Container;
+import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
@@ -7,6 +10,7 @@ import net.minecraft.util.NonNullList;
 import net.minecraftforge.items.ItemStackHandler;
 
 import javax.annotation.Nonnull;
+import java.util.EnumMap;
 import java.util.HashMap;
 
 public class ItemStackInventory {
@@ -14,7 +18,7 @@ public class ItemStackInventory {
 
     private final Handler handlerContainer;
     private final Handler handlerFacingNull;
-    private final HashMap<EnumFacing, Handler> handlerFacing = new HashMap<>();
+    private final EnumMap<EnumFacing, Handler> handlerFacing = new EnumMap<EnumFacing, Handler>(EnumFacing.class);
 
     public ItemStackInventory(ExposedItemStackHandler itemStackHandler) {
         this.itemStackHandler = itemStackHandler;

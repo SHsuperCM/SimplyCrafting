@@ -1,26 +1,21 @@
 package shcm.shsupercm.forge.simplycrafting.common;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.CraftingManager;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.*;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.items.CapabilityItemHandler;
-import net.minecraftforge.items.ItemStackHandler;
 import shcm.shsupercm.forge.core.smart.ItemStackInventory;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.ArrayList;
 
 public class TESimplyCrafter extends TileEntity implements ITickable {
-    //protected CraftingItemHandler craftingItemHandler = new CraftingItemHandler();
     private DummyInventoryCrafting dummyInventoryCrafting = new DummyInventoryCrafting(null);
-    protected IRecipe recipe = null;
+    private IRecipe recipe = null;
     protected ItemStackInventory inventory = new ItemStackInventory(new ItemStackInventory.ExposedItemStackHandler(10)) {
         @Nonnull
         @Override
@@ -32,23 +27,17 @@ public class TESimplyCrafter extends TileEntity implements ITickable {
                     return super.insertItem(slot, stack, simulate, container, facing);
                 else
                     return stack;
-            } else {
-                ItemStack item = super.insertItem(slot, stack, simulate, container, facing);
-
-                dummyInventoryCrafting.stackList = getInternalItemStackHandler().getStacks();
-                recipe = CraftingManager.findMatchingRecipe(dummyInventoryCrafting, world);
-
-                return item;
-            }
+            } else
+                return super.insertItem(slot, stack, simulate, container, facing);
         }
 
         @Nonnull
         @Override
         public ItemStack extractItem(int slot, int amount, boolean simulate, boolean container, EnumFacing facing) {
-            if(slot == 9) {
-                if(recipe.matches(dummyInventoryCrafting, world)) {
+            if (slot == 9) {
+                if (recipe != null && recipe.matches(dummyInventoryCrafting, world)) {
                     ItemStack result = recipe.getCraftingResult(dummyInventoryCrafting);
-                    if(!simulate)
+                    if (!simulate)
                         getInternalItemStackHandler().setStacks(recipe.getRemainingItems(dummyInventoryCrafting));
 
                     return result;
@@ -56,20 +45,14 @@ public class TESimplyCrafter extends TileEntity implements ITickable {
 
                 return ItemStack.EMPTY;
             }
-            if(!container) {
-                if(recipe != null && !recipe.getIngredients().get(slot).apply(getInternalItemStackHandler().getStackInSlot(slot)))
-                    return super.extractItem(slot, amount, simulate, container, facing);
+            if (!container) {
+                /*if (recipe != null && !recipe.getIngredients().get(slot).apply(getInternalItemStackHandler().getStackInSlot(slot)))
+                    return super.extractItem(slot, amount, simulate, container, facing);*/
                 return ItemStack.EMPTY;
             } else {
-                ItemStack item = super.extractItem(slot, amount, simulate, container, facing);
-                if(!simulate) {
-                    dummyInventoryCrafting.stackList = getInternalItemStackHandler().getStacks();
-                    recipe = CraftingManager.findMatchingRecipe(dummyInventoryCrafting, world);
-                }
-                return item;
+                return super.extractItem(slot, amount, simulate, container, facing);
             }
         }
-
     };
 
     @Override
@@ -119,5 +102,11 @@ public class TESimplyCrafter extends TileEntity implements ITickable {
     @Override
     public <T> T getCapability(@Nonnull Capability<T> capability, @Nullable EnumFacing facing) {
         return hasCapability(capability, facing) ? (T) this.inventory.facing(facing) : null;
+    }
+
+    public void refreshRecipe() {
+        dummyInventoryCrafting.stackList = inventory.getInternalItemStackHandler().getStacks();
+        recipe = CraftingManager.findMatchingRecipe(dummyInventoryCrafting, world);
+        markDirty();
     }
 }
