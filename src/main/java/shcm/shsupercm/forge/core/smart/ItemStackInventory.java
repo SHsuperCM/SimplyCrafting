@@ -1,20 +1,19 @@
 package shcm.shsupercm.forge.core.smart;
 
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.Container;
-import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.NonNullList;
+import net.minecraftforge.common.util.INBTSerializable;
+import net.minecraftforge.items.ItemHandlerHelper;
 import net.minecraftforge.items.ItemStackHandler;
 
 import javax.annotation.Nonnull;
 import java.util.EnumMap;
-import java.util.HashMap;
 
-public class ItemStackInventory {
+public class ItemStackInventory implements INBTSerializable<NBTTagCompound> {
     private final ExposedItemStackHandler itemStackHandler;
+    private ExposedItemStackHandler filterItemStackHandler;
 
     private final Handler handlerContainer;
     private final Handler handlerFacingNull;
@@ -22,6 +21,7 @@ public class ItemStackInventory {
 
     public ItemStackInventory(ExposedItemStackHandler itemStackHandler) {
         this.itemStackHandler = itemStackHandler;
+        this.filterItemStackHandler = new ExposedItemStackHandler(10);
         handlerContainer = new Handler(this, true, null);
         handlerFacingNull = new Handler(this, false, null);
         for (EnumFacing enumFacing : EnumFacing.values())
@@ -40,6 +40,25 @@ public class ItemStackInventory {
 
     public final ExposedItemStackHandler getInternalItemStackHandler() {
         return itemStackHandler;
+    }
+
+    public ExposedItemStackHandler getFilterItemStackHandler() {
+        return filterItemStackHandler;
+    }
+
+    @Override
+    public NBTTagCompound serializeNBT() {
+        NBTTagCompound compound = itemStackHandler.serializeNBT();
+        if(filterItemStackHandler != null && autoHandleFiltering())
+            compound.setTag("filter", filterItemStackHandler.serializeNBT());
+        return compound;
+    }
+
+    @Override
+    public void deserializeNBT(NBTTagCompound compound) {
+        itemStackHandler.deserializeNBT(compound);
+        if(autoHandleFiltering() && compound.hasKey("filter"))
+            (filterItemStackHandler = new ExposedItemStackHandler(NonNullList.create())).deserializeNBT(compound.getCompoundTag("filter"));
     }
 
     public static class ExposedItemStackHandler extends ItemStackHandler {
@@ -127,11 +146,34 @@ public class ItemStackInventory {
 
     @Nonnull
     public ItemStack insertItem(int slot, @Nonnull ItemStack stack, boolean simulate, boolean container, EnumFacing facing) {
+        if(autoHandleFiltering() && shouldSlotHandleFiltering(slot, container, facing)) {
+            if(shouldReplaceFilter(slot, stack, container, facing))
+                filterItemStackHandler.setStackInSlot(slot, ItemHandlerHelper.copyStackWithSize(stack, 1));
+            else if(!filterItemStackHandler.getStackInSlot(slot).isItemEqual(stack))
+                return stack;
+        }
         return itemStackHandler.insertItem(slot, stack, simulate);
     }
 
     @Nonnull
     public ItemStack extractItem(int slot, int amount, boolean simulate, boolean container, EnumFacing facing) {
-        return itemStackHandler.extractItem(slot, amount, simulate);
+        ItemStack result = itemStackHandler.extractItem(slot, amount, simulate);
+        if(autoHandleFiltering() && shouldSlotHandleFiltering(slot, container, facing)) {
+            if(shouldReplaceFilter(slot, ItemStack.EMPTY, container, facing))
+                filterItemStackHandler.setStackInSlot(slot, ItemStack.EMPTY);
+        }
+        return result;
+    }
+
+    protected boolean autoHandleFiltering() {
+        return false;
+    }
+
+    protected boolean shouldSlotHandleFiltering(int slot, boolean container, EnumFacing facing) {
+        return false;
+    }
+
+    protected boolean shouldReplaceFilter(int slot, ItemStack newFilter, boolean container, EnumFacing facing) {
+        return false;
     }
 }

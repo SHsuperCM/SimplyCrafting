@@ -9,49 +9,65 @@ import net.minecraft.util.*;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.items.CapabilityItemHandler;
 import shcm.shsupercm.forge.core.smart.ItemStackInventory;
+import shcm.shsupercm.forge.simplycrafting.utility.CraftingSimplyHelper;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 public class TESimplyCrafter extends TileEntity implements ITickable {
-    private DummyInventoryCrafting dummyInventoryCrafting = new DummyInventoryCrafting(null);
     private IRecipe recipe = null;
     protected ItemStackInventory inventory = new ItemStackInventory(new ItemStackInventory.ExposedItemStackHandler(10)) {
         @Nonnull
         @Override
         public ItemStack insertItem(int slot, @Nonnull ItemStack stack, boolean simulate, boolean container, EnumFacing facing) {
-            if(slot == 9)
+            if (slot == 9)
                 return stack;
-            if(!container) {
-                if(recipe != null && recipe.getIngredients().get(slot).apply(stack))
-                    return super.insertItem(slot, stack, simulate, container, facing);
-                else
-                    return stack;
-            } else
-                return super.insertItem(slot, stack, simulate, container, facing);
+
+            return super.insertItem(slot, stack, simulate, container, facing);
         }
 
         @Nonnull
         @Override
         public ItemStack extractItem(int slot, int amount, boolean simulate, boolean container, EnumFacing facing) {
             if (slot == 9) {
-                if (recipe != null && recipe.matches(dummyInventoryCrafting, world)) {
-                    ItemStack result = recipe.getCraftingResult(dummyInventoryCrafting);
-                    if (!simulate)
-                        getInternalItemStackHandler().setStacks(recipe.getRemainingItems(dummyInventoryCrafting));
+                if (recipe != null) {
+                    CraftingSimplyHelper items = CraftingSimplyHelper.wrap(3, 3, inventory.getInternalItemStackHandler().getStacks());
+                    if(recipe.matches(items, world)) {
+                        ItemStack result = recipe.getCraftingResult(items);
+                        if (!simulate) {
+                            NonNullList<ItemStack> remainingItems = recipe.getRemainingItems(items);
+                            for (int i = 0; i < remainingItems.size(); i++)
+                                if(remainingItems.get(i).isEmpty())
+                                    getInternalItemStackHandler().getStackInSlot(i).setCount(getInternalItemStackHandler().getStackInSlot(i).getCount() - 1);
+                                else
+                                    getInternalItemStackHandler().setStackInSlot(i, remainingItems.get(i));
+                        }
 
-                    return result;
+                        return result;
+                    }
                 }
 
                 return ItemStack.EMPTY;
-            }
-            if (!container) {
-                /*if (recipe != null && !recipe.getIngredients().get(slot).apply(getInternalItemStackHandler().getStackInSlot(slot)))
-                    return super.extractItem(slot, amount, simulate, container, facing);*/
+            } else if (!container){
                 return ItemStack.EMPTY;
-            } else {
-                return super.extractItem(slot, amount, simulate, container, facing);
             }
+
+            return super.extractItem(slot, amount, simulate, container, facing);
+        }
+
+        @Override
+        protected boolean autoHandleFiltering() {
+            return true;
+        }
+
+        @Override
+        protected boolean shouldSlotHandleFiltering(int slot, boolean container, EnumFacing facing) {
+            return slot >= 0 && slot <= 8;
+        }
+
+        @Override
+        protected boolean shouldReplaceFilter(int slot, ItemStack newFilter, boolean container, EnumFacing facing) {
+            return slot >= 0 && slot <= 8 && container;
         }
     };
 
@@ -89,7 +105,7 @@ public class TESimplyCrafter extends TileEntity implements ITickable {
             if(recipe == null)
                 inventory.getInternalItemStackHandler().getStacks().set(9, ItemStack.EMPTY);
             else
-                inventory.getInternalItemStackHandler().getStacks().set(9, recipe.getRecipeOutput());
+                inventory.getInternalItemStackHandler().setStackInSlot(9, recipe.getRecipeOutput());
         }
     }
 
@@ -105,8 +121,7 @@ public class TESimplyCrafter extends TileEntity implements ITickable {
     }
 
     public void refreshRecipe() {
-        dummyInventoryCrafting.stackList = inventory.getInternalItemStackHandler().getStacks();
-        recipe = CraftingManager.findMatchingRecipe(dummyInventoryCrafting, world);
+        recipe = CraftingSimplyHelper.findRecipe(3, 3, inventory.getInternalItemStackHandler().getStacks(), world);
         markDirty();
     }
 }

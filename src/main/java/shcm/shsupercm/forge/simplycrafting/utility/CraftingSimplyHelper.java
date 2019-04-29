@@ -1,4 +1,4 @@
-package shcm.shsupercm.forge.simplycrafting.common;
+package shcm.shsupercm.forge.simplycrafting.utility;
 
 import net.minecraft.client.util.RecipeItemHelper;
 import net.minecraft.entity.player.EntityPlayer;
@@ -6,24 +6,32 @@ import net.minecraft.inventory.Container;
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.inventory.ItemStackHelper;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.crafting.CraftingManager;
+import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.world.World;
 
-/**
- * Copied from InventoryCrafting and changed a bit to be less stupid.
- */
-public class DummyInventoryCrafting extends InventoryCrafting {
-    /** List of the stacks in the crafting matrix. */
-    public NonNullList<ItemStack> stackList;
-    /** the width of the crafting inventory */
-    public final int inventoryWidth = 3;
-    public final int inventoryHeight = 3;
+public class CraftingSimplyHelper extends InventoryCrafting {
+    private NonNullList<ItemStack> stackList;
+    private final int inventoryWidth;
+    private final int inventoryHeight;
 
-    public DummyInventoryCrafting(NonNullList<ItemStack> stackList) {
-        super(null, 3, 3);
-        this.stackList = stackList;
+    private CraftingSimplyHelper(int width, int height, NonNullList<ItemStack> items) {
+        super(null, width, height);
+        this.inventoryWidth = width;
+        this.inventoryHeight = height;
+        this.stackList = items;
+    }
+
+    public static IRecipe findRecipe(int width, int height, NonNullList<ItemStack> items, World world) {
+        return CraftingManager.findMatchingRecipe(wrap(width, height, items), world);
+    }
+
+    public static CraftingSimplyHelper wrap(int width, int height, NonNullList<ItemStack> items) {
+        return new CraftingSimplyHelper(width, height, items);
     }
 
     /**
@@ -31,7 +39,7 @@ public class DummyInventoryCrafting extends InventoryCrafting {
      */
     public int getSizeInventory()
     {
-        return 9;
+        return inventoryWidth*inventoryHeight;
     }
 
     public boolean isEmpty()
