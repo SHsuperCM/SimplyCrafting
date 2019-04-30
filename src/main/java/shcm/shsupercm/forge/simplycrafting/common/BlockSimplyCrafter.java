@@ -16,6 +16,7 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.items.CapabilityItemHandler;
+import net.minecraftforge.items.ItemStackHandler;
 import shcm.shsupercm.forge.core.smart.ItemStackInventory;
 import shcm.shsupercm.forge.simplycrafting.SimplyCrafting;
 
@@ -48,16 +49,12 @@ public class BlockSimplyCrafter extends Block {
         return true;
     }
 
-    @Override
-    protected BlockStateContainer createBlockState() {
-        return super.createBlockState();
-    }
 
     @Override
     public void breakBlock(World worldIn, BlockPos pos, IBlockState state) {
         if(!worldIn.isRemote)
-            for(ItemStack item : (((ItemStackInventory.ExposedItemStackHandler)worldIn.getTileEntity(pos).getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null)).getStacks()))
-                worldIn.spawnEntity(new EntityItem(worldIn, pos.getX() + 0.5d, pos.getY() + 0.5d, pos.getZ() + 0.5d, item));
+            ((TESimplyCrafter)worldIn.getTileEntity(pos)).dropItems(worldIn);
+
         super.breakBlock(worldIn, pos, state);
     }
 }

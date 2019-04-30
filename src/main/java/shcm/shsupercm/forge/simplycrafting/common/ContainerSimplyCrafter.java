@@ -9,7 +9,7 @@ import net.minecraft.item.crafting.CraftingManager;
 import net.minecraftforge.items.SlotItemHandler;
 import shcm.shsupercm.forge.core.smart.Container;
 
-public class ContainerSimplyCrafter extends Container {
+public class ContainerSimplyCrafter extends Container {//drag should throw slot click after
     private TESimplyCrafter tileEntity;
     private InventoryPlayer inventoryPlayer;
 
@@ -29,6 +29,13 @@ public class ContainerSimplyCrafter extends Container {
                 this.addSlotToContainer(new SlotItemHandler(tileEntity.inventory.container(), x + y * 3, 30 + x * 18, 17 + y * 18));
 
         this.addSlotToContainer(new SlotItemHandler(tileEntity.inventory.container(), 9, 124, 35));
+    }
+
+    @Override
+    public void onContainerClosed(EntityPlayer playerIn) {
+        ://todo work only when closed
+
+        super.onContainerClosed(playerIn);
     }
 
     @Override
