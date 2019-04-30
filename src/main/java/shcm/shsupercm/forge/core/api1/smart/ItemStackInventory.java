@@ -1,4 +1,4 @@
-package shcm.shsupercm.forge.core.smart;
+package shcm.shsupercm.forge.core.api1.smart;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -21,7 +21,9 @@ public class ItemStackInventory implements INBTSerializable<NBTTagCompound> {
 
     public ItemStackInventory(ExposedItemStackHandler itemStackHandler) {
         this.itemStackHandler = itemStackHandler;
+        this.itemStackHandler.inventory = this;
         this.filterItemStackHandler = new ExposedItemStackHandler(10);
+        this.filterItemStackHandler.inventory = this;
         handlerContainer = new Handler(this, true, null);
         handlerFacingNull = new Handler(this, false, null);
         for (EnumFacing enumFacing : EnumFacing.values())
@@ -62,6 +64,8 @@ public class ItemStackInventory implements INBTSerializable<NBTTagCompound> {
     }
 
     public static class ExposedItemStackHandler extends ItemStackHandler {
+        private ItemStackInventory inventory;
+
         public ExposedItemStackHandler(int size) {
             super(size);
         }
@@ -77,10 +81,14 @@ public class ItemStackInventory implements INBTSerializable<NBTTagCompound> {
         public void setStacks(NonNullList<ItemStack> stacks) {
             this.stacks = stacks;
         }
+
+        public ItemStackInventory getInventory() {
+            return inventory;
+        }
     }
 
-    private static class Handler extends ItemStackHandler {
-        private final ItemStackInventory itemStackInventory;
+    protected static class Handler extends ItemStackHandler {
+        protected final ItemStackInventory itemStackInventory;
         private final boolean container;
         private final EnumFacing facing;
 
@@ -130,7 +138,7 @@ public class ItemStackInventory implements INBTSerializable<NBTTagCompound> {
 
         @Override
         public boolean isItemValid(int slot, @Nonnull ItemStack stack) {
-            return itemStackInventory.itemStackHandler.isItemValid(slot, stack);
+            return itemStackInventory.isItemValid(slot, stack, container, facing);
         }
 
         @Override
@@ -149,7 +157,7 @@ public class ItemStackInventory implements INBTSerializable<NBTTagCompound> {
         if(autoHandleFiltering() && shouldSlotHandleFiltering(slot, container, facing)) {
             if(shouldReplaceFilter(slot, stack, container, facing))
                 filterItemStackHandler.setStackInSlot(slot, ItemHandlerHelper.copyStackWithSize(stack, 1));
-            else if(!filterItemStackHandler.getStackInSlot(slot).isItemEqual(stack))
+            else if(!doesItemMatchFilter(stack, slot))
                 return stack;
         }
         return itemStackHandler.insertItem(slot, stack, simulate);
@@ -160,9 +168,17 @@ public class ItemStackInventory implements INBTSerializable<NBTTagCompound> {
         ItemStack result = itemStackHandler.extractItem(slot, amount, simulate);
         if(autoHandleFiltering() && shouldSlotHandleFiltering(slot, container, facing)) {
             if(shouldReplaceFilter(slot, ItemStack.EMPTY, container, facing))
-                filterItemStackHandler.setStackInSlot(slot, ItemStack.EMPTY);
+                filterItemStackHandler.setStackInSlot(slot, ItemHandlerHelper.copyStackWithSize(getInternalItemStackHandler().getStackInSlot(slot), 1));
         }
         return result;
+    }
+
+    public boolean doesItemMatchFilter(ItemStack stack, int slot) {
+        return filterItemStackHandler.getStackInSlot(slot).isItemEqual(stack);
+    }
+
+    public boolean isItemValid(int slot, ItemStack stack, boolean container, EnumFacing facing) {
+        return true;
     }
 
     protected boolean autoHandleFiltering() {
@@ -175,5 +191,11 @@ public class ItemStackInventory implements INBTSerializable<NBTTagCompound> {
 
     protected boolean shouldReplaceFilter(int slot, ItemStack newFilter, boolean container, EnumFacing facing) {
         return false;
+    }
+
+    public void clickEmptySlot(int slotId) {
+        if(autoHandleFiltering() && shouldSlotHandleFiltering(slotId, true, null)) {
+            filterItemStackHandler.getStacks().set(slotId, ItemStack.EMPTY);
+        }
     }
 }
