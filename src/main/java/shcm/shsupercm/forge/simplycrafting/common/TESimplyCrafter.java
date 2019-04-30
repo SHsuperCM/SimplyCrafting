@@ -37,6 +37,7 @@ public class TESimplyCrafter extends TileEntity implements ITickable {
         @Override
         public ItemStack extractItem(int slot, int amount, boolean simulate, boolean container, EnumFacing facing) {
             return super.extractItem(slot, amount, simulate, container, facing);
+            //todo if slot 9 only, craft. if not , check if items can escape the filter
         }
 
         @Override
