@@ -2,8 +2,10 @@ package shcm.shsupercm.forge.simplycrafting.common;
 
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
+import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
@@ -38,8 +40,10 @@ public class CommonProxy {
             public Object getServerGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z) {
                 TileEntity tileEntity = world.getTileEntity(new BlockPos(x, y, z));
 
-                if (tileEntity != null && tileEntity instanceof TESimplyCrafter && ID == 0)
+                if (tileEntity != null && tileEntity instanceof TESimplyCrafter && ID == 0) {
+                    ((EntityPlayerMP)player).connection.sendPacket(new SPacketUpdateTileEntity(tileEntity.getPos(), 0, tileEntity.serializeNBT()));
                     return new ContainerSimplyCrafter((TESimplyCrafter) tileEntity, player.inventory);
+                }
 
                 return null;
             }

@@ -174,7 +174,8 @@ public class ItemStackInventory implements INBTSerializable<NBTTagCompound> {
     }
 
     public boolean doesItemMatchFilter(ItemStack stack, int slot) {
-        return filterItemStackHandler.getStackInSlot(slot).isItemEqual(stack);
+        ItemStack filterStack = filterItemStackHandler.getStackInSlot(slot);
+        return (filterStack.isEmpty() && stack.isEmpty()) || filterStack.isItemEqual(stack);
     }
 
     public boolean isItemValid(int slot, ItemStack stack, boolean container, EnumFacing facing) {

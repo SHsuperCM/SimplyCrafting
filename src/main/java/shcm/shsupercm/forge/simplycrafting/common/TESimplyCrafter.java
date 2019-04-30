@@ -5,6 +5,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.CraftingManager;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.network.NetworkManager;
+import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.*;
 import net.minecraft.world.World;
@@ -16,7 +18,7 @@ import shcm.shsupercm.forge.simplycrafting.utility.CraftingSimplyHelper;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-public class TESimplyCrafter extends TileEntity implements ITickable {
+public class TESimplyCrafter extends TileEntity {
     public IRecipe recipe = null;
     public ItemStackInventory inventory = new ItemStackInventory(new ItemStackInventory.ExposedItemStackHandler(10) {
         @Override
@@ -51,20 +53,24 @@ public class TESimplyCrafter extends TileEntity implements ITickable {
                         return ItemStack.EMPTY;
                 } else if (slot == 9) {
                     if (getInternalItemStackHandler().getStackInSlot(slot).isEmpty() && recipe != null) {
-                        CraftingSimplyHelper items = CraftingSimplyHelper.wrap(3, 3, inventory.getInternalItemStackHandler().getStacks());
-                        if (recipe.matches(items, world)) {
-                            ItemStack result = recipe.getCraftingResult(items);
+                        boolean matchesFilter = true;
+                        for (int i = 0; i <= 8 && (matchesFilter = doesItemMatchFilter(getInternalItemStackHandler().getStackInSlot(i), i)); i++);
+                        if(matchesFilter) {
+                            CraftingSimplyHelper items = CraftingSimplyHelper.wrap(3, 3, inventory.getInternalItemStackHandler().getStacks());
+                            if (recipe.matches(items, world)) {
+                                ItemStack result = recipe.getCraftingResult(items);
 
-                            NonNullList<ItemStack> remainingItems = recipe.getRemainingItems(items);
-                            for (int i = 0; i < remainingItems.size(); i++) {
-                                ItemStack item = remainingItems.get(i);
-                                if (item.isEmpty())
-                                    inventory.getInternalItemStackHandler().getStackInSlot(i).shrink(1);
-                                else
-                                    inventory.getInternalItemStackHandler().setStackInSlot(i, item);
+                                NonNullList<ItemStack> remainingItems = recipe.getRemainingItems(items);
+                                for (int i = 0; i < remainingItems.size(); i++) {
+                                    ItemStack item = remainingItems.get(i);
+                                    if (item.isEmpty())
+                                        inventory.getInternalItemStackHandler().getStackInSlot(i).shrink(1);
+                                    else
+                                        inventory.getInternalItemStackHandler().setStackInSlot(i, item);
+                                }
+
+                                inventory.getInternalItemStackHandler().setStackInSlot(9, result);
                             }
-
-                            inventory.getInternalItemStackHandler().setStackInSlot(9, result);
                         }
                     }
                 }
@@ -115,10 +121,8 @@ public class TESimplyCrafter extends TileEntity implements ITickable {
     }
 
     @Override
-    public void update() {
-        if(world.isRemote) {
-            world.spawnParticle(EnumParticleTypes.FLAME, getPos().getX() + 0.5f, pos.getY() + 1.5f, pos.getZ() + 0.5f, 0.0001d, 0.0001d, 0.0001d);
-        }
+    public void onDataPacket(NetworkManager net, SPacketUpdateTileEntity pkt) {
+        deserializeNBT(pkt.getNbtCompound());
     }
 
     @Override

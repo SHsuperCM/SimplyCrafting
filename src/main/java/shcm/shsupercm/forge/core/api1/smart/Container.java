@@ -25,11 +25,6 @@ public class Container extends net.minecraft.inventory.Container {
     }
 
     @Override
-    public boolean canDragIntoSlot(Slot slotIn) {
-        return slotIn.slotNumber < 36;
-    }
-
-    @Override
     protected Slot addSlotToContainer(Slot slotIn) {
         new SlotModifier(slotIn);
         return super.addSlotToContainer(slotIn);
