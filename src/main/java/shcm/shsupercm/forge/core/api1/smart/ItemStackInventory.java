@@ -128,7 +128,7 @@ public class ItemStackInventory implements INBTSerializable<NBTTagCompound> {
         @Nonnull
         @Override
         public ItemStack getStackInSlot(int slot) {
-            return itemStackInventory.itemStackHandler.getStackInSlot(slot);
+            return itemStackInventory.getStackInSlot(slot, container, facing);
         }
 
         @Override
@@ -151,7 +151,6 @@ public class ItemStackInventory implements INBTSerializable<NBTTagCompound> {
             itemStackInventory.itemStackHandler.deserializeNBT(nbt);
         }
     }
-
     @Nonnull
     public ItemStack insertItem(int slot, @Nonnull ItemStack stack, boolean simulate, boolean container, EnumFacing facing) {
         if(autoHandleFiltering() && shouldSlotHandleFiltering(slot, container, facing)) {
@@ -173,13 +172,20 @@ public class ItemStackInventory implements INBTSerializable<NBTTagCompound> {
         return result;
     }
 
-    public boolean doesItemMatchFilter(ItemStack stack, int slot) {
-        ItemStack filterStack = filterItemStackHandler.getStackInSlot(slot);
-        return (filterStack.isEmpty() && stack.isEmpty()) || filterStack.isItemEqual(stack);
+    @Nonnull
+    public ItemStack getStackInSlot(int slot, boolean container, EnumFacing facing) {
+        return itemStackHandler.getStackInSlot(slot);
     }
+
+
 
     public boolean isItemValid(int slot, ItemStack stack, boolean container, EnumFacing facing) {
         return true;
+    }
+
+    public boolean doesItemMatchFilter(ItemStack stack, int slot) {
+        ItemStack filterStack = filterItemStackHandler.getStackInSlot(slot);
+        return (filterStack.isEmpty() && stack.isEmpty()) || filterStack.isItemEqual(stack);
     }
 
     protected boolean autoHandleFiltering() {

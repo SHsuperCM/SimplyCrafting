@@ -1,6 +1,7 @@
 package shcm.shsupercm.forge.simplycrafting.common;
 
 import net.minecraft.entity.item.EntityItem;
+import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.CraftingManager;
 import net.minecraft.item.crafting.IRecipe;
@@ -78,7 +79,13 @@ public class TESimplyCrafter extends TileEntity {
             return super.extractItem(slot, amount, simulate, container, facing);
         }
 
-
+        @Nonnull
+        @Override
+        public ItemStack getStackInSlot(int slot, boolean container, EnumFacing facing) {
+            if(slot == 9 && !container)
+                return new ItemStack(Items.STICK,1);
+            return super.getStackInSlot(slot, container, facing);
+        }
 
         @Override
         protected boolean autoHandleFiltering() {
