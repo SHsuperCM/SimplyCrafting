@@ -82,8 +82,8 @@ public class TESimplyCrafter extends TileEntity {
         @Nonnull
         @Override
         public ItemStack getStackInSlot(int slot, boolean container, EnumFacing facing) {
-            if(slot == 9 && !container)
-                return new ItemStack(Items.STICK,1);
+            if(slot == 9 && !container && recipe != null)
+                return recipe.getRecipeOutput();
             return super.getStackInSlot(slot, container, facing);
         }
 
