@@ -154,9 +154,10 @@ public class ItemStackInventory implements INBTSerializable<NBTTagCompound> {
     @Nonnull
     public ItemStack insertItem(int slot, @Nonnull ItemStack stack, boolean simulate, boolean container, EnumFacing facing) {
         if(autoHandleFiltering() && shouldSlotHandleFiltering(slot, container, facing)) {
-            if(shouldReplaceFilter(slot, stack, container, facing))
+            if(shouldReplaceFilter(slot, stack, container, facing)) {
                 filterItemStackHandler.setStackInSlot(slot, ItemHandlerHelper.copyStackWithSize(stack, 1));
-            else if(!doesItemMatchFilter(stack, slot))
+                onFilterItemsChanged();
+            } else if(!doesItemMatchFilter(stack, slot))
                 return stack;
         }
         return itemStackHandler.insertItem(slot, stack, simulate);
@@ -166,8 +167,10 @@ public class ItemStackInventory implements INBTSerializable<NBTTagCompound> {
     public ItemStack extractItem(int slot, int amount, boolean simulate, boolean container, EnumFacing facing) {
         ItemStack result = itemStackHandler.extractItem(slot, amount, simulate);
         if(autoHandleFiltering() && shouldSlotHandleFiltering(slot, container, facing)) {
-            if(shouldReplaceFilter(slot, ItemStack.EMPTY, container, facing))
+            if(shouldReplaceFilter(slot, ItemStack.EMPTY, container, facing)) {
                 filterItemStackHandler.setStackInSlot(slot, ItemHandlerHelper.copyStackWithSize(getInternalItemStackHandler().getStackInSlot(slot), 1));
+                onFilterItemsChanged();
+            }
         }
         return result;
     }
@@ -200,9 +203,14 @@ public class ItemStackInventory implements INBTSerializable<NBTTagCompound> {
         return false;
     }
 
+    public void onFilterItemsChanged() {
+
+    }
+
     public void clickEmptySlot(int slotId) {
         if(autoHandleFiltering() && shouldSlotHandleFiltering(slotId, true, null)) {
             filterItemStackHandler.getStacks().set(slotId, ItemStack.EMPTY);
+            onFilterItemsChanged();
         }
     }
 }

@@ -1,6 +1,7 @@
 package shcm.shsupercm.forge.simplycrafting.common;
 
 import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.CraftingManager;
@@ -100,6 +101,11 @@ public class TESimplyCrafter extends TileEntity {
         @Override
         protected boolean shouldReplaceFilter(int slot, ItemStack newFilter, boolean container, EnumFacing facing) {
             return slot >= 0 && slot <= 8 && container;
+        }
+
+        @Override
+        public void onFilterItemsChanged() {
+            refreshRecipe();
         }
     };
 

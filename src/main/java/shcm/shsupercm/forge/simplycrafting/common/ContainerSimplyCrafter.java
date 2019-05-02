@@ -9,7 +9,7 @@ import net.minecraftforge.items.SlotItemHandler;
 import shcm.shsupercm.forge.core.api1.smart.Container;
 
 public class ContainerSimplyCrafter extends Container {//drag should throw slot click after
-    private TESimplyCrafter tileEntity;
+    public TESimplyCrafter tileEntity;
     private InventoryPlayer inventoryPlayer;
 
     public ContainerSimplyCrafter(TESimplyCrafter tileEntity, InventoryPlayer inventoryPlayer) {
@@ -35,10 +35,12 @@ public class ContainerSimplyCrafter extends Container {//drag should throw slot 
         if(slotId == 45)
             return ItemStack.EMPTY;
         ItemStack result = super.slotClick(slotId, dragType, clickTypeIn, player);
-        if(slotId >= 36 && slotId <= 44) {
+        /*if(slotId >= 36 && slotId <= 44) {
             tileEntity.refreshRecipe();
             //detectAndSendChanges();
-        }
+        }*/
         return result;
     }
+
+
 }
