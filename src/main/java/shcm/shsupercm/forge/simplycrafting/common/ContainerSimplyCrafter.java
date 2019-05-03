@@ -9,7 +9,7 @@ import net.minecraftforge.items.SlotItemHandler;
 import shcm.shsupercm.forge.core.api1.smart.Container;
 
 public class ContainerSimplyCrafter extends Container {//drag should throw slot click after
-    public TESimplyCrafter tileEntity;
+    protected TESimplyCrafter tileEntity;
     private InventoryPlayer inventoryPlayer;
 
     public ContainerSimplyCrafter(TESimplyCrafter tileEntity, InventoryPlayer inventoryPlayer) {

@@ -2,7 +2,6 @@ package shcm.shsupercm.forge.simplycrafting.utility;
 
 import net.minecraft.client.util.RecipeItemHelper;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.Container;
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.inventory.ItemStackHelper;
 import net.minecraft.item.ItemStack;
@@ -13,7 +12,6 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
-import shcm.shsupercm.forge.core.api1.smart.ItemStackInventory;
 
 public class CraftingSimplyHelper extends InventoryCrafting {
     private NonNullList<ItemStack> stackList;
