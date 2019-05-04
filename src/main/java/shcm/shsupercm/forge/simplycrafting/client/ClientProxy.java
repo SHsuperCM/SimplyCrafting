@@ -10,7 +10,6 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import shcm.shsupercm.forge.simplycrafting.common.CommonProxy;
 
-@Mod.EventBusSubscriber
 @SideOnly(Side.CLIENT)
 public class ClientProxy extends CommonProxy {
 
